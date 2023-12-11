@@ -1,0 +1,29 @@
+//map
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+int main(){
+	typedef map<string, int> maptype;
+	maptype populationmap;
+	populationmap.insert(pair<string, int> ("maharshtra",72732));
+	populationmap.insert(pair<string, int> ("goa",3332));
+	populationmap.insert(pair<string, int> ("rajasthan",21232));
+	populationmap.insert(pair<string, int> ("mp",1112));
+	populationmap.insert(pair<string, int> ("up",999932));
+	maptype::iterator iter;
+	cout<<"population of states in inadia"<<endl;
+	cout<<"size of population map"<<populationmap.size()<<endl;
+	string state_name;
+	cout<<"enter states name"<<endl;
+	cin>>state_name;
+	iter = populationmap.find(state_name);
+	if (iter!=populationmap.end()){
+		cout<<"population of given state is"<<iter -> second<<endl;
+
+	}
+	else{
+		cout<<"state doesnt exist in population map"<<endl;
+		populationmap.clear();
+	}
+}
