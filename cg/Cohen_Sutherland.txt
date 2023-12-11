@@ -1,0 +1,38 @@
+//cohen sutherland
+#include <iostream>
+#include <graphics.h>
+using namespace std;
+
+int main() {
+    int gd = DETECT, gm;
+    initgraph(&gd, &gm, "");
+
+    int x1 = 50, y1 = 50, x2 = 200, y2 = 200;    // coordinates of line
+    int xmin = 100, ymin = 100, xmax = 300, ymax = 300;       //coordinates of rectangle
+
+    // Draw the clipping window
+    rectangle(xmin, ymin, xmax, ymax);             //drawing the rectangle
+
+    int c1 = (x1 < xmin) | ((x1 > xmax) << 1) | ((y1 < ymin) << 2) | ((y1 > ymax) << 3);     //Computes the region code for the first endpoint of the line using the Cohen-Sutherland encoding.
+    int c2 = (x2 < xmin) | ((x2 > xmax) << 1) | ((y2 < ymin) << 2) | ((y2 > ymax) << 3);
+
+    while ((c1 | c2) && !(c1 & c2)) {        //Enters a loop that continues until both endpoints are inside the clipping window or both outside.
+        double m = (double)(y2 - y1) / (x2 - x1);      //calculates slope
+        int code = c1 ? c1 : c2;                  //Chooses the region code for processing.
+
+        x1 = (code & 1) ? xmin : (code & 2) ? xmax : x1;
+        y1 = (code & 4) ? ymin : (code & 8) ? ymax : y1;
+
+        if (code == c1) c1 = 0;
+        else c2 = 0;
+
+        c1 |= (x1 < xmin) | ((x1 > xmax) << 1) | ((y1 < ymin) << 2) | ((y1 > ymax) << 3);
+    }
+
+    // Draw the clipped line
+    line(x1, y1, x2, y2);
+
+    getch();
+    closegraph();
+    return 0;
+}
