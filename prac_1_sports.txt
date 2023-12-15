@@ -1,0 +1,132 @@
+# cricket = ["Ram", "Shyam", "Mohan", "Sita"]
+# badminton = ["Sita", "Geeta", "Rahul", "Ram"]
+# football = ["Rohan", "Mohan", "Sita"]
+# Put the above input. 
+
+
+
+cricket = []
+badminton = []
+football = []
+cr=int(input("Enter The Number Of Students In Cricket: "))
+for i in range(1,cr+1):
+    cr1=input(f"Enter The Name Of Student {i}: ")
+    cricket.append(cr1)
+    
+bd=int(input("Enter The Number Of Students In Badminton: "))
+for i in range(1,bd+1):
+    bd1=input(f"Enter The Name Of Student {i}: ")
+    badminton.append(bd1)
+
+fb=int(input("Enter The Number Of Students In Football: "))
+for i in range(1,fb+1):
+    fb1=input(f"Enter The Name Of Student {i}: ")
+    football.append(fb1)
+
+def remove_duplicates(data):
+    """
+    Removes duplicate entries from a list.
+    """
+    seen = []
+    result = []
+    for item in data:
+        if item not in seen:
+            seen.append(item)
+            result.append(item)
+    return result
+
+def students_playing_both(cricket, badminton):
+    """
+    Returns the list of students who play both cricket and badminton.
+    """
+    both = []
+    for student in cricket:
+        for player in badminton:
+            if student == player:
+                both.append(student)
+                break
+    return remove_duplicates(both)
+
+def students_playing_either(cricket, badminton):
+    """
+    Returns the list of students who play either cricket or badminton but not both.
+    """
+    either = []
+    for student in cricket:
+        is_found = False
+        for player in badminton:
+            if student == player:
+                is_found = True
+                break
+        if not is_found:
+            either.append(student)
+    for student in badminton:
+        is_found = False
+        for player in cricket:
+            if student == player:
+                is_found = True
+                break
+        if not is_found:
+            either.append(student)
+    return remove_duplicates(either)
+
+def students_playing_neither(cricket, badminton, football):
+    """
+    Returns the number of students who play neither cricket nor badminton.
+    """
+    all_players = remove_duplicates(cricket + badminton + football)
+    neither = 0
+    for player in all_players:
+        is_cricket = False
+        is_badminton = False
+        for student in cricket:
+            if player == student:
+                is_cricket = True
+                break
+        for student in badminton:
+            if player == student:
+                is_badminton = True
+                break
+        if not is_cricket and not is_badminton:
+            neither += 1
+    return neither
+
+def students_playing_cricket_and_football(cricket, football, badminton):
+    """
+    Returns the number of students who play cricket and football but not badminton.
+    """
+    cricket_and_football = []
+    for student in cricket:
+        is_football = False
+        is_badminton = False
+        for player in football:
+            if student == player:
+                is_football = True
+                break
+        for player in badminton:
+            if student == player:
+                is_badminton = True
+                break
+        if is_football and not is_badminton:
+            cricket_and_football.append(student)
+    return len(cricket_and_football)
+
+students_both = students_playing_both(cricket, badminton)
+print("Students playing both cricket and badminton: ", students_both)
+
+students_either = students_playing_either(cricket, badminton)
+print("Students playing either cricket or badminton but not both: ", students_either)
+
+neither_players = students_playing_neither(cricket, badminton, football)
+print("Number of students playing neither cricket nor badminton: ", neither_players)
+
+cricket_and_football_players = students_playing_cricket_and_football(cricket, football, badminton)
+print("Number of students playing cricket and football but not badminton: ", cricket_and_football_players)
+
+
+
+
+
+
+
+

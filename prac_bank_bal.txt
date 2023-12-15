@@ -1,0 +1,26 @@
+def deposit(num):
+    global total
+    total = total + num
+
+def withdraw(num):
+    global total
+    if total >= num:
+        total = total - num
+    else:
+        print('Insufficient balance')
+
+list1 = []
+total = 0
+
+str1 = input('Enter transaction log: ')
+list1.extend(str1.split())
+a = int(input('Enter number of transactions: '))
+
+for i in range(0, 2 * a, 1):
+    if list1[i] == 'D':
+        deposit(int(list1[i + 1]))
+      
+    elif list1[i] == 'W':
+        withdraw(int(list1[i + 1]))
+
+print('Balance is', total)
