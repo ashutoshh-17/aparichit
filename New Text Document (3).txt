@@ -1,0 +1,60 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Record {
+    int key;
+    string data;
+    bool valid;
+
+    Record(int k, const string& d) : key(k), data(d), valid(true) {}
+};
+
+class DirectAccessFile {
+private:
+    vector<Record> records;
+
+public:
+    void insertRecord(int key, const string& data) {
+        records.emplace_back(key, data);
+        cout << "Record with key " << key << " inserted successfully.\n";
+    }
+
+    void deleteRecord(int key) {
+        for (auto& record : records) {
+            if (record.key == key && record.valid) {
+                record.valid = false;
+                cout << "Record with key " << key << " deleted successfully.\n";
+                return;
+            }
+        }
+        cout << "Record with key " << key << " not found.\n";
+    }
+
+    void printRecords() {
+        cout << "Records in the Direct Access File:\n";
+        for (const auto& record : records) {
+            if (record.valid) {
+                cout << "Key: " << record.key << ", Data: " << record.data << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    DirectAccessFile daf;
+
+    daf.insertRecord(101, "Data for key 101");
+    daf.insertRecord(202, "Data for key 202");
+    daf.insertRecord(303, "Data for key 303");
+
+    daf.printRecords();
+
+    daf.deleteRecord(202);
+
+    daf.printRecords();
+
+    return 0;
+}

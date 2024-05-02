@@ -1,0 +1,123 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <queue>
+#include <unordered_set>
+#include <algorithm> // Include algorithm header for all_of
+using namespace std;
+
+class GraphAdjList {
+    map<string, vector<pair<string, int>>> adjList;
+
+public:
+    void addEdge(const string& src, const string& dest, int weight) {
+        adjList[src].push_back({dest, weight});
+        adjList[dest].push_back({src, weight});
+    }
+
+    bool isConnected() {
+        unordered_set<string> visited;
+        DFSUtil(adjList.begin()->first, visited);
+        return visited.size() == adjList.size();
+    }
+
+private:
+    void DFSUtil(const string& currentNode, unordered_set<string>& visited) {
+        visited.insert(currentNode);
+        for (const auto& neighbor : adjList[currentNode]) {
+            if (visited.find(neighbor.first) == visited.end()) {
+                DFSUtil(neighbor.first, visited);
+            }
+        }
+    }
+};
+
+class GraphAdjMatrix {
+    vector<vector<int>> adjMatrix;
+
+public:
+    GraphAdjMatrix(int n) {
+        adjMatrix.resize(n, vector<int>(n, 0));
+    }
+
+    void addEdge(int src, int dest, int weight) {
+        adjMatrix[src][dest] = weight;
+        adjMatrix[dest][src] = weight;
+    }
+
+    bool isConnected() {
+        vector<bool> visited(adjMatrix.size(), false);
+        DFSUtil(0, visited);
+        return all_of(visited.begin(), visited.end(), [](bool v) { return v; });
+    }
+
+private:
+    void DFSUtil(int currentNode, vector<bool>& visited) {
+        visited[currentNode] = true;
+        for (int neighbor = 0; neighbor < adjMatrix.size(); ++neighbor) {
+            if (adjMatrix[currentNode][neighbor] != 0 && !visited[neighbor]) {
+                DFSUtil(neighbor, visited);
+            }
+        }
+    }
+};
+
+int main() {
+    int choice;
+    int numCities;
+    cout << "Enter the number of cities: ";
+    cin >> numCities;
+
+    GraphAdjList graphAdjList;
+    GraphAdjMatrix graphAdjMatrix(numCities);
+
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add a flight path (Adjacency List)\n";
+        cout << "2. Add a flight path (Adjacency Matrix)\n";
+        cout << "3. Check if graph is connected (Adjacency List)\n";
+        cout << "4. Check if graph is connected (Adjacency Matrix)\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                string src, dest;
+                int weight;
+                cout << "Enter source city: ";
+                cin >> src;
+                cout << "Enter destination city: ";
+                cin >> dest;
+                cout << "Enter weight/cost of the flight: ";
+                cin >> weight;
+                graphAdjList.addEdge(src, dest, weight);
+                break;
+            }
+            case 2: {
+                int src, dest, weight;
+                cout << "Enter source city index (0-based): ";
+                cin >> src;
+                cout << "Enter destination city index (0-based): ";
+                cin >> dest;
+                cout << "Enter weight/cost of the flight: ";
+                cin >> weight;
+                graphAdjMatrix.addEdge(src, dest, weight);
+                break;
+            }
+            case 3:
+                cout << "Graph is " << (graphAdjList.isConnected() ? "" : "not ") << "connected.\n";
+                break;
+            case 4:
+                cout << "Graph is " << (graphAdjMatrix.isConnected() ? "" : "not ") << "connected.\n";
+                break;
+            case 5:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid choice.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}

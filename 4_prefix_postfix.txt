@@ -1,0 +1,53 @@
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+struct TreeNode {
+    char data;
+    TreeNode *left, *right;
+    TreeNode(char val) : data(val), left(nullptr), right(nullptr) {}
+};
+
+TreeNode* constructExpressionTree(const string& prefix) {
+    stack<TreeNode*> st;
+    for (int i = prefix.size() - 1; i >= 0; --i) {
+        char c = prefix[i];
+        TreeNode* newNode = new TreeNode(c);
+        if (!isalpha(c)) {
+            newNode->left = st.top(); st.pop();
+            newNode->right = st.top(); st.pop();
+        }
+        st.push(newNode);
+    }
+    return st.top();
+}
+
+void postOrderTraversal(TreeNode* root) {
+    stack<TreeNode*> st;
+    TreeNode *lastVisited = nullptr, *current = root;
+    while (current || !st.empty()) {
+        if (current) {
+            st.push(current);
+            current = current->left;
+        } else {
+            TreeNode* peekNode = st.top();
+            if (peekNode->right && lastVisited != peekNode->right) {
+                current = peekNode->right;
+            } else {
+                cout << peekNode->data << " ";
+                lastVisited = peekNode;
+                st.pop();
+            }
+        }
+    }
+}
+
+int main() {
+    string prefix = "+--a*bc/def";
+    TreeNode* root = constructExpressionTree(prefix);
+    cout << "Post-order Traversal: ";
+    postOrderTraversal(root);
+    cout << endl;
+    return 0;
+}

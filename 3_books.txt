@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <memory>
+
+using namespace std;
+
+// Define the Node structure for the tree
+struct Node {
+    string name;
+    vector<unique_ptr<Node>> children;
+    Node(string n) : name(move(n)) {}
+};
+
+// Function to print nodes recursively
+void printNodes(const Node* node, int depth = 0) {
+    for (int i = 0; i < depth; ++i)
+        cout << " ";
+    cout << "- " << node->name << endl;
+    for (const auto& child : node->children)
+        printNodes(child.get(), depth + 1);
+}
+
+int main() {
+    auto start = chrono::high_resolution_clock::now(); // Start time measurement
+    
+    // Constructing the book tree
+    auto book = make_unique<Node>("Book");
+    
+    // Adding chapters and sections
+    book->children.emplace_back(make_unique<Node>("Chapter 1"));
+    book->children.emplace_back(make_unique<Node>("Chapter 2"));
+    book->children[0]->children.emplace_back(make_unique<Node>("Section 1.1"));
+    book->children[0]->children.emplace_back(make_unique<Node>("Section 1.2"));
+    book->children[0]->children[0]->children.emplace_back(make_unique<Node>("Subsection 1.1.1"));
+    book->children[0]->children[0]->children.emplace_back(make_unique<Node>("Subsection 1.1.2"));
+    book->children[0]->children[1]->children.emplace_back(make_unique<Node>("Subsection 1.2.1"));
+    book->children[1]->children.emplace_back(make_unique<Node>("Section 2.1"));
+
+    auto stop = chrono::high_resolution_clock::now(); // Stop time measurement
+    
+    // Printing the nodes
+    printNodes(book.get());
+    
+    // Calculate duration
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << "Time Complexity: O(n)" << endl; // Time complexity
+    cout << "Space Complexity: O(n)" << endl; // Space complexity
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl; // Time taken
+    
+    return 0;
+}

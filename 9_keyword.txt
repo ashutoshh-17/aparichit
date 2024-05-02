@@ -1,0 +1,248 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct Node {
+    string keyword;
+    string meaning;
+    int height;
+    Node* left;
+    Node* right;
+};
+
+class AVLDictionary {
+private:
+    Node* root;
+
+    int getHeight(Node* node) {
+        return (node == nullptr) ? -1 : node->height;
+    }
+
+    int getBalanceFactor(Node* node) {
+        return (node == nullptr) ? 0 : getHeight(node->left) - getHeight(node->right);
+    }
+
+    Node* rotateRight(Node* y) {
+        Node* x = y->left;
+        Node* T2 = x->right;
+        x->right = y;
+        y->left = T2;
+        y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+        x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+        return x;
+    }
+
+    Node* rotateLeft(Node* x) {
+        Node* y = x->right;
+        Node* T2 = y->left;
+        y->left = x;
+        x->right = T2;
+        x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+        y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+        return y;
+    }
+
+    Node* insert(Node* node, const string& keyword, const string& meaning) {
+        if (node == nullptr)
+            return new Node{keyword, meaning, 0, nullptr, nullptr};
+
+        if (keyword < node->keyword)
+            node->left = insert(node->left, keyword, meaning);
+        else if (keyword > node->keyword)
+            node->right = insert(node->right, keyword, meaning);
+        else
+            return node;
+
+        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+        int balance = getBalanceFactor(node);
+
+        if (balance > 1 && keyword < node->left->keyword)
+            return rotateRight(node);
+        if (balance < -1 && keyword > node->right->keyword)
+            return rotateLeft(node);
+        if (balance > 1 && keyword > node->left->keyword) {
+            node->left = rotateLeft(node->left);
+            return rotateRight(node);
+        }
+        if (balance < -1 && keyword < node->right->keyword) {
+            node->right = rotateRight(node->right);
+            return rotateLeft(node);
+        }
+        return node;
+    }
+
+    Node* minValueNode(Node* node) {
+        Node* current = node;
+        while (current->left != nullptr)
+            current = current->left;
+        return current;
+    }
+
+    Node* deleteNode(Node* root, const string& keyword) {
+        if (root == nullptr)
+            return root;
+
+        if (keyword < root->keyword)
+            root->left = deleteNode(root->left, keyword);
+        else if (keyword > root->keyword)
+            root->right = deleteNode(root->right, keyword);
+        else {
+            if (root->left == nullptr || root->right == nullptr) {
+                Node* temp = root->left ? root->left : root->right;
+                if (temp == nullptr) {
+                    temp = root;
+                    root = nullptr;
+                } else {
+                    *root = *temp;
+                }
+                delete temp;
+            } else {
+                Node* temp = minValueNode(root->right);
+                root->keyword = temp->keyword;
+                root->right = deleteNode(root->right, temp->keyword);
+            }
+        }
+
+        if (root == nullptr)
+            return root;
+
+        root->height = 1 + max(getHeight(root->left), getHeight(root->right));
+        int balance = getBalanceFactor(root);
+
+        if (balance > 1 && getBalanceFactor(root->left) >= 0)
+            return rotateRight(root);
+        if (balance > 1 && getBalanceFactor(root->left) < 0) {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+        if (balance < -1 && getBalanceFactor(root->right) <= 0)
+            return rotateLeft(root);
+        if (balance < -1 && getBalanceFactor(root->right) > 0) {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+        return root;
+    }
+
+    void inorder(Node* node) {
+        if (node == nullptr)
+            return;
+        inorder(node->left);
+        cout << node->keyword << ": " << node->meaning << endl;
+        inorder(node->right);
+    }
+
+    void reverseInorder(Node* node) {
+        if (node == nullptr)
+            return;
+        reverseInorder(node->right);
+        cout << node->keyword << ": " << node->meaning << endl;
+        reverseInorder(node->left);
+    }
+
+    int findKeyword(Node* node, const string& keyword, int& comparisons) {
+        if (node == nullptr)
+            return -1;
+
+        comparisons++;
+        if (keyword == node->keyword)
+            return comparisons;
+        else if (keyword < node->keyword)
+            return findKeyword(node->left, keyword, comparisons);
+        else
+            return findKeyword(node->right, keyword, comparisons);
+    }
+
+public:
+    AVLDictionary() : root(nullptr) {}
+
+    void addEntry(const string& keyword, const string& meaning) {
+        root = insert(root, keyword, meaning);
+    }
+
+    void deleteEntry(const string& keyword) {
+        root = deleteNode(root, keyword);
+    }
+
+    void displayAscending() {
+        cout << "Dictionary Entries (Ascending Order):\n";
+        inorder(root);
+    }
+
+    void displayDescending() {
+        cout << "Dictionary Entries (Descending Order):\n";
+        reverseInorder(root);
+    }
+
+    void searchKeyword(const string& keyword) {
+        int comparisons = 0;
+        int maxComparisons = findKeyword(root, keyword, comparisons);
+        if (maxComparisons == -1)
+            cout << "Keyword not found.\n";
+        else
+            cout << "Keyword found with " << comparisons << " comparisons. Maximum comparisons: " <<
+                 maxComparisons << endl;
+    }
+};
+
+int main() {
+    AVLDictionary dictionary;
+    int choice;
+    string keyword, meaning;
+
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add a new keyword\n";
+        cout << "2. Delete a keyword\n";
+        cout << "3. Update meaning of a keyword\n";
+        cout << "4. Display dictionary in ascending order\n";
+        cout << "5. Display dictionary in descending order\n";
+        cout << "6. Search for a keyword\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter keyword: ";
+                cin >> keyword;
+                cout << "Enter meaning: ";
+                cin.ignore(); 
+                getline(cin, meaning);
+                dictionary.addEntry(keyword, meaning);
+                break;
+            case 2:
+                cout << "Enter keyword to delete: ";
+                cin >> keyword;
+                dictionary.deleteEntry(keyword);
+                break;
+            case 3:
+                cout << "Enter keyword to update: ";
+                cin >> keyword;
+                cout << "Enter new meaning: ";
+                cin.ignore(); 
+                getline(cin, meaning);
+                dictionary.deleteEntry(keyword);
+                dictionary.addEntry(keyword, meaning);
+                break;
+            case 4:
+                dictionary.displayAscending();
+                break;
+            case 5:
+                dictionary.displayDescending();
+                break;
+            case 6:
+                cout << "Enter keyword to search: ";
+                cin >> keyword;
+                dictionary.searchKeyword(keyword);
+                break;
+            case 7:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid choice.\n";
+        }
+    } while (choice != 7);
+
+    return 0;
+}

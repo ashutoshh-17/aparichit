@@ -1,0 +1,61 @@
+class HashTable:
+    def __init__(self, size):
+        self.size = size
+        self.table = [[] for _ in range(size)]
+        
+    def hash_function(self, key):
+        return hash(key) % self.size
+        
+    def insert(self, key, value):
+        index = self.hash_function(key)
+        self.table[index].append((key, value))
+        
+    def separate_chaining_search(self, key):
+        index = self.hash_function(key)
+        comparisons = 0
+        for k, v in self.table[index]:
+            comparisons += 1
+            if k == key:
+                return v, comparisons
+        return None, comparisons
+        
+    def linear_probing_search(self, key):
+        index = self.hash_function(key)
+        start_index = index
+        comparisons = 0
+        while True:
+            if self.table[index]:
+                k, v = self.table[index][0]
+                comparisons += 1
+                if k == key:
+                    return v, comparisons
+            index = (index + 1) % self.size
+            if index == start_index:
+                break
+            comparisons += 1
+        return None, comparisons
+
+def create_phone_book():
+    n = int(input("Enter number of clients: "))
+    phone_book = HashTable(n)
+    for _ in range(n):
+        name = input("Enter client name: ")
+        number = input("Enter client's telephone number: ")
+        phone_book.insert(name, number)
+    return phone_book
+
+def compare_collision_handling(phone_book):
+    total_comparisons_separate_chaining = 0
+    total_comparisons_linear_probing = 0
+    for i in range(len(phone_book.table)):
+        for key, _ in phone_book.table[i]:
+            _, comparisons = phone_book.separate_chaining_search(key)
+            total_comparisons_separate_chaining += comparisons
+            _, comparisons = phone_book.linear_probing_search(key)
+            total_comparisons_linear_probing += comparisons
+    print("\nComparison Result:")
+    print("Total comparisons with separate chaining:", total_comparisons_separate_chaining)
+    print("Total comparisons with linear probing:", total_comparisons_linear_probing)
+
+phone_book = create_phone_book()
+compare_collision_handling(phone_book)

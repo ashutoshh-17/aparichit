@@ -1,0 +1,94 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <queue>
+#include <unordered_set>
+using namespace std;
+
+class Graph {
+    map<string, vector<string>> adjList;
+
+public:
+    void addEdge(const string& src, const string& dest) {
+        adjList[src].push_back(dest);
+        adjList[dest].push_back(src); 
+    }
+
+    void DFS(const string& startNode) {
+        unordered_set<string> visited;
+        DFSUtil(startNode, visited);
+    }
+
+    void BFS(const string& startNode) {
+        unordered_set<string> visited;
+        queue<string> q;
+        q.push(startNode);
+        visited.insert(startNode);
+        while (!q.empty()) {
+            string current = q.front();
+            q.pop();
+            cout << current << " ";
+            for (const string& neighbor : adjList[current]) {
+                if (visited.find(neighbor) == visited.end()) {
+                    q.push(neighbor);
+                    visited.insert(neighbor);
+                }
+            }
+        }
+        cout << endl;
+    }
+
+private:
+    void DFSUtil(const string& currentNode, unordered_set<string>& visited) {
+        visited.insert(currentNode);
+        cout << currentNode << " ";
+        for (const string& neighbor : adjList[currentNode]) {
+            if (visited.find(neighbor) == visited.end()) {
+                DFSUtil(neighbor, visited);
+            }
+        }
+    }
+};
+
+int main() {
+    Graph graph;
+    graph.addEdge("College", "Library");
+    graph.addEdge("College", "Cafeteria");
+    graph.addEdge("Library", "Park");
+    graph.addEdge("Library", "Market");
+    graph.addEdge("Cafeteria", "Gym");
+    graph.addEdge("Park", "Hospital");
+    graph.addEdge("Hospital", "Stadium");
+    int choice;
+    string startNode;
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Perform DFS traversal\n";
+        cout << "2. Perform BFS traversal\n";
+        cout << "3. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                cout << "Enter starting node for DFS traversal: ";
+                cin >> startNode;
+                cout << "DFS traversal: ";
+                graph.DFS(startNode);
+                cout << endl;
+                break;
+            case 2:
+                cout << "Enter starting node for BFS traversal: ";
+                cin >> startNode;
+                cout << "BFS traversal: ";
+                graph.BFS(startNode);
+                cout << endl;
+                break;
+            case 3:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid choice.\n";
+        }
+    } while (choice != 3);
+    return 0;
+}

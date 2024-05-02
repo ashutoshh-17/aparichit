@@ -1,0 +1,116 @@
+#include <iostream>
+#include <queue>
+using namespace std;
+
+struct Node {
+    int data;
+    Node *left, *right;
+    bool isThreaded;
+    Node(int value) : data(value), left(nullptr), right(nullptr), isThreaded(false) {}
+};
+
+Node* createThreadedTree(Node* root) {
+    if (root == nullptr) return nullptr;
+    Node* prev = nullptr;
+    Node* current = root;
+    while (current != nullptr) {
+        if (current->left == nullptr) {
+            if (prev != nullptr && prev->right == nullptr) {
+                prev->right = current;
+                prev->isThreaded = true;
+            }
+            prev = current;
+            current = current->right;
+        } else {
+            Node* next = current->left;
+            while (next->right != nullptr && next->right != current)
+                next = next->right;
+            if (next->right == nullptr) {
+                next->right = current;
+                next->isThreaded = true;
+                current = current->left;
+            } else {
+                next->right = nullptr;
+                prev = current;
+                current = current->right;
+            }
+        }
+    }
+    return root;
+}
+
+void inorderTraversal(Node* root) {
+    Node* current = root;
+    while (current != nullptr) {
+        while (current->left != nullptr)
+            current = current->left;
+        cout << current->data << " ";
+        if (current->isThreaded)
+            current = current->right;
+        else {
+            current = current->right;
+            while (current != nullptr && !current->isThreaded)
+                current = current->left;
+        }
+    }
+}
+
+void displayMenu() {
+    cout << "1. Insert a node\n";
+    cout << "2. Convert to threaded binary tree\n";
+    cout << "3. Inorder traversal\n";
+    cout << "4. Exit\n";
+}
+
+int main() {
+    Node* root = nullptr;
+    int choice, value;
+    do {
+        displayMenu();
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> value;
+                if (root == nullptr)
+                    root = new Node(value);
+                else {
+                    queue<Node*> q;
+                    q.push(root);
+                    while (!q.empty()) {
+                        Node* temp = q.front();
+                        q.pop();
+                        if (temp->left != nullptr)
+                            q.push(temp->left);
+                        else {
+                            temp->left = new Node(value);
+                            break;
+                        }
+                        if (temp->right != nullptr)
+                            q.push(temp->right);
+                        else {
+                            temp->right = new Node(value);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 2:
+                root = createThreadedTree(root);
+                cout << "Binary tree converted to threaded binary tree.\n";
+                break;
+            case 3:
+                cout << "Inorder traversal of threaded binary tree: ";
+                inorderTraversal(root);
+                cout << endl;
+                break;
+            case 4:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid choice.\n";
+        }
+    } while (choice != 4);
+    return 0;
+}

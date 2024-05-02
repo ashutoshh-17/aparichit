@@ -1,0 +1,131 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+struct Student {
+    int rollNumber;
+    string name;
+    string division;
+    string address;
+};
+
+void displayStudent(const Student& student) {
+    cout << "Roll Number: " << student.rollNumber << endl;
+    cout << "Name: " << student.name << endl;
+    cout << "Division: " << student.division << endl;
+    cout << "Address: " << student.address << endl;
+}
+
+void addStudent(const string& fileName) {
+    ofstream file(fileName, ios::app);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file." << endl;
+        return;
+    }
+    Student student;
+    cout << "Enter Roll Number: ";
+    cin >> student.rollNumber;
+    cout << "Enter Name: ";
+    cin.ignore();
+    getline(cin, student.name);
+    cout << "Enter Division: ";
+    getline(cin, student.division);
+    cout << "Enter Address: ";
+    getline(cin, student.address);
+    file << student.rollNumber << " " << student.name << " " << student.division << " " << student.address << endl;
+    file.close();
+    cout << "Student information added successfully." << endl;
+}
+
+void deleteStudent(const string& fileName, int rollNumber) {
+    ifstream inFile(fileName);
+    if (!inFile.is_open()) {
+        cerr << "Error: Unable to open file." << endl;
+        return;
+    }
+    ofstream tempFile("temp.txt");
+    if (!tempFile.is_open()) {
+        cerr << "Error: Unable to create temporary file." << endl;
+        return;
+    }
+    bool found = false;
+    Student student;
+    while (inFile >> student.rollNumber >> student.name >> student.division >> student.address) {
+        if (student.rollNumber != rollNumber) {
+            tempFile << student.rollNumber << " " << student.name << " " << student.division << " " << student.address << endl;
+        } else {
+            found = true;
+        }
+    }
+    inFile.close();
+    tempFile.close();
+    remove(fileName.c_str());
+    rename("temp.txt", fileName.c_str());
+    if (found) {
+        cout << "Student information with Roll Number " << rollNumber << " deleted successfully." << endl;
+    } else {
+        cout << "Student information with Roll Number " << rollNumber << " not found." << endl;
+    }
+}
+
+void displayStudentInfo(const string& fileName, int rollNumber) {
+    ifstream file(fileName);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file." << endl;
+        return;
+    }
+    Student student;
+    bool found = false;
+    while (file >> student.rollNumber >> student.name >> student.division >> student.address) {
+        if (student.rollNumber == rollNumber) {
+            displayStudent(student);
+            found = true;
+            break;
+        }
+    }
+    file.close();
+    if (!found) {
+        cout << "Student information with Roll Number " << rollNumber << " not found." << endl;
+    }
+}
+
+void displayMenu() {
+    cout << "\nMenu:\n";
+    cout << "1. Add Student Information\n";
+    cout << "2. Delete Student Information\n";
+    cout << "3. Display Student Information\n";
+    cout << "4. Exit\n";
+    cout << "Enter your choice: ";
+}
+
+int main() {
+    string fileName = "student_data.txt";
+    int choice, rollNumber;
+    do {
+        displayMenu();
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                addStudent(fileName);
+                break;
+            case 2:
+                cout << "Enter Roll Number to delete: ";
+                cin >> rollNumber;
+                deleteStudent(fileName, rollNumber);
+                break;
+            case 3:
+                cout << "Enter Roll Number to display: ";
+                cin >> rollNumber;
+                displayStudentInfo(fileName, rollNumber);
+                break;
+            case 4:
+                cout << "Exiting program." << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid choice." << endl;
+        }
+    } while (choice != 4);
+    return 0;
+}
